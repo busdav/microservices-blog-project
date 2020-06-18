@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posts-depl
+spec:
+  replicas: 1
+  # Tells the Deployment which are the pods it needs to manage
+  selector:
+    matchLabels:
+      # This is a label. The key could be anything really. `app` doesn't have a specific meaning.
+      app: posts
+  # Template for the pods - essentially a the content of a pod config file:
+  template:
+    metadata:
+      # This ties in with `matchLabels` selector spec above
+      labels:
+        app: posts
+    spec:
+      containers:
+        - name: posts
+          # `latest` can be omitted - K8 (or Docker?) will then still look for latest by default, on Docker Hub
+          image: busdav/posts:latest
+
+# To colocate also the Cluster IP config, you can do that via the three dashes separator.
+# (You could also create a separate file for it)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: posts-clusterip-srv
+spec:
+  selector:
+    app: posts
+  # By default, K8s will create a type of ClusterIP, so next line is optional
+  type: ClusterIP
+  ports:
+    - name: posts
+      protocol: TCP
+      port: 4000
+      targetPort: 4000

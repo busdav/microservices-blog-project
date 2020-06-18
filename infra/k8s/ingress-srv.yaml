@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-srv
+  # The ingress-nginx Ingress Controller we previously installed is going to continuously scan all the different config files we're throwing into the Cluster.
+  # The annotation below will help the Ingress Controller understand that we're trying to feed it some routing rules.
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  # `rules` will have the actual routing rules to apply to outside world incoming traffic, within the cluster.
+  rules:
+    # `host` will tell the Ingress Controller which app the rules apply to. Because, k8s is assuming that there could be several apps within one cluster.
+    # Now, how do we translate this into our local dev environment? We need to trick our local machine into thinking that whenever we say 'go to posts.com',
+    # local machine needs to go to localhost. -> config change of our local `/etc/hosts` file (add `127.0.0.1 posts.com`)
+    # The posts.com url could be anything - chosen here as it seems semantic.
+    - host: posts.com
+      http:
+        paths:
+          - path: /posts/create
+            backend:
+              serviceName: posts-clusterip-srv
+              servicePort: 4000
+          - path: /posts
+            backend:
+              serviceName: query-srv
+              servicePort: 4002
+          # This is routing configuration that's going to be interpreted by nginx. nginx does not support the `:id` wildcard.
+          # Instead, needs to be RegEx. For that, we need to add the regex annotation (see above).
+          - path: /posts/?(.*)/comments
+            backend:
+              serviceName: comments-srv
+              servicePort: 4001
+          # This is the regular wildcard route for the react app (needs to be at the end)
+          - path: /?(.*)
+            backend:
+              serviceName: client-srv
+              servicePort: 3000

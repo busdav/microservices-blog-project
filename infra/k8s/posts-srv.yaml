@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: posts-srv
+spec:
+  type: NodePort
+  selector:
+    # Find all pods with a label of `posts` and expose those to the outside world:
+    # The whole label/selector system is very similar to HTML tags
+    app: posts
+  ports:
+    - name: posts
+      protocol: TCP
+      # Port of the K8s Service that we're configuring:
+      port: 4000
+      # Port of the K8s Pod (with our container) where that Service should be routing traffic to:
+      targetPort: 4000
+      # There will also be a randomly assigned port, the "nodePort", usually 30xxx, 31xxx, or 32xxx, that is used to get access to the
+      # NodePort Service we're configuring here, from *outside of our cluster*
+
