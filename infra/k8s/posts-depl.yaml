@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: posts-depl
 spec:
+  # How many pods do you want this deployment to run? This is what replicas specifies
   replicas: 1
   # Tells the Deployment which are the pods it needs to manage
   selector:
@@ -21,8 +22,12 @@ spec:
           # `latest` can be omitted - K8 (or Docker?) will then still look for latest by default, on Docker Hub
           image: busdav/posts:latest
 
-# To colocate also the Cluster IP config, you can do that via the three dashes separator.
-# (You could also create a separate file for it)
+# Whenever you create a deployment, you usually also want to create a cluster IP Service (which is a Kubernetes service),
+# in order to give you access to a pod.
+# A cluster IP service is going to allow communication to that cluster IP service from anything else running (only) inside of our cluster.
+# To colocate  the cluster IP config in the same file as the deployment config file, you can do that via the
+# three dashes separator. (You could also create a separate file for it, but often there will be a 1:1 ratio between our
+# deployments and our (cluster IP) services, so it kind of makes sense to put everything into one file.)
 ---
 apiVersion: v1
 kind: Service
